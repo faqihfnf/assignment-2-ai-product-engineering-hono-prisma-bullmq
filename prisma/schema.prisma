@@ -1,0 +1,17 @@
+// use prisma-next
+
+model Job {
+  id          String   @id @default(uuid())
+  destination String
+  budget      String
+  status      String
+  createdAt   DateTime @default(now())
+}
+
+model JobResult {
+  id        String   @id @default(uuid())
+  name      String
+  description String
+  location  String
+  jobId     String
+}
