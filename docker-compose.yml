@@ -1,24 +1,35 @@
 services:
-  db:
+  postgres:
     image: postgres:16
-    container_name: hono-postgres
+    container_name: studyguide-postgres
     environment:
-      POSTGRES_USER: hono
-      POSTGRES_PASSWORD: hono
-      POSTGRES_DB: hono
+      POSTGRES_USER: studyguide
+      POSTGRES_PASSWORD: studyguide
+      POSTGRES_DB: studyguide
     ports:
       - "55432:5432"
     volumes:
-      - hono_prisma_db:/var/lib/postgresql/data
+      - studyguide_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studyguide -d studyguide"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   redis:
     image: redis:7
-    container_name: hono-redis
+    container_name: studyguide-redis
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
     ports:
       - "6380:6379"
     volumes:
-      - hono_prisma_redis:/data
+      - studyguide_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
-  hono_prisma_db:
-  hono_prisma_redis:
+  studyguide_pg:
+  studyguide_redis:

@@ -5,15 +5,11 @@
     "strict": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ],
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "rootDir": "./src",
-    "outDir": "./dist",
+    "noEmit": true,
+    "types": ["node", "temporal-polyfill/types/global"],
     "moduleResolution": "bundler",
     "resolveJsonModule": true
   },
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

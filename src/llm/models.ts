@@ -1,13 +1,11 @@
 import { OpenAIClient } from "@anvia/openai";
-import "dotenv/config";
+import { env } from "../config/env";
 
 export const client = new OpenAIClient({
-  apiKey: process.env.OPENAI_API_KEY || "",
-  baseUrl: process.env.OPENAI_BASE_URL,
+  apiKey: env.OPENAI_API_KEY,
+  baseUrl: env.OPENAI_BASE_URL || undefined,
 });
 
-export function getModel(modelId?: string) {
-  return client.completionModel({
-    modelId: modelId || "gpt-5.6-luna",
-  });
+export function getModel(modelId = env.OPENAI_MODEL) {
+  return client.completionModel({ modelId });
 }

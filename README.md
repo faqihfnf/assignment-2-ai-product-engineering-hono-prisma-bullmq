@@ -1,227 +1,143 @@
-# Hono + Prisma + BullMQ
+# AI Study Guide API
 
-A teaching project for the **Devscale AI Product Engineering program**. Build an asynchronous travel recommendation API with Hono, PostgreSQL, Prisma Next, Redis, and BullMQ.
+Final assignment **Devscale AI Product Engineering**: API Hono yang menjalankan pipeline AI sungguhan secara asinkron.
 
-A client submits a destination and budget. The API saves the request and returns immediately; a separate worker calls an AI model and stores the suggestions for the client to retrieve later.
-
-## What you will learn
-
-- Create HTTP routes with Hono and validate request bodies with Zod.
-- Define database models and query PostgreSQL through Prisma Next.
-- Separate HTTP request handling from slow AI work using BullMQ.
-- Run an API and a worker as separate processes connected through Redis.
-- Generate structured AI output and persist it in the database.
-- Understand the difference between accepting a job and completing it.
-
-## Request flow
-
-```text
-Client                         API                         Worker
-  |                             |                             |
-  |-- POST /jobs --------------->|                             |
-  |                             |-- Save PENDING job in PostgreSQL
-  |                             |-- Enqueue job in Redis ---->|
-  |<-- 202 Accepted + job ID ----|                             |
-  |                             |                    Load job from PostgreSQL
-  |                             |                    Generate AI suggestions
-  |                             |                    Save JobResult records
-  |                             |                    Set job to COMPLETED
-  |-- GET /jobs/:id ------------>|                             |
-  |<-- Saved suggestions -------|                             |
-```
-
-The queue is named `ai-tenerary-queue`, and each submitted task is named `generate-destination`. The API and worker must use the same queue name and Redis connection.
+Kirim sebuah **topik** (opsional: materi/catatan sendiri) → API langsung membalas `202` → worker BullMQ memanggil model lewat **anvia** dalam 3 langkah → hasil study guide (tujuan belajar, penjelasan konsep, kuis pilihan ganda) disimpan di PostgreSQL lewat **Prisma 8 (Prisma Next)**.
 
 ## Stack
 
-| Tool | Role |
+| Tool | Peran |
 | --- | --- |
-| Hono + Node.js | HTTP server on port `3000` |
-| Zod | Request validation and AI output schema |
-| Prisma Next | Typed database queries and generated data contracts |
-| PostgreSQL 16 | Stores jobs and generated suggestions |
-| BullMQ + Redis 7 | Background job queue |
-| Anvia + OpenAI-compatible provider | Structured AI generation |
-| TypeScript + tsx | Development runtime |
-| pnpm + Docker Compose | Dependencies and local services |
+| Hono + `@hono/node-server` | HTTP API (port `3000`) |
+| Zod | Validasi request & skema output model |
+| Prisma 8 (Prisma Next) + PostgreSQL 16 | Menyimpan job, status, dan hasil |
+| BullMQ 6 + Redis 7 | Antrean job, retry + backoff |
+| anvia (`@anvia/core`, `@anvia/openai`) | Panggilan model terstruktur di worker |
 
-This repository uses **Prisma Next prerelease packages** and the contract-based API (`db.orm.public.Job`). Use the versions in the lockfile and the commands below; standard Prisma Client tutorials may use different APIs.
+## Endpoint
 
-## Getting started
-
-### 1. Install prerequisites and dependencies
-
-You need Node.js **22.18 or newer**, pnpm (this project was inspected with `11.22.0`), Docker with Docker Compose, and an API key for an OpenAI-compatible provider.
-
-```bash
-git clone git@github.com:Devscale-Indonesia/hono-prisma-bullmq.git
-cd hono-prisma-bullmq
-pnpm install --frozen-lockfile
-cp .env.example .env
-```
-
-### 2. Configure the environment
-
-Edit `.env`:
-
-```dotenv
-DATABASE_URL="postgresql://hono:hono@localhost:55432/hono"
-OPENAI_API_KEY="your-api-key"
-# Optional: set this when using a custom OpenAI-compatible provider.
-# OPENAI_BASE_URL="https://your-provider.example/v1"
-```
-
-The database URL matches the credentials and host port in `docker-compose.yml`. Redis is configured directly in [`src/worker/config.ts`](src/worker/config.ts) as `localhost:6380`; there is no Redis environment variable in the current implementation.
-
-The model defaults to `gpt-5.6-luna` in [`src/llm/models.ts`](src/llm/models.ts). Ensure your configured provider supports that model, or change the default model ID in that file to one your provider supports. The app does not currently read a model ID from the environment.
-
-Keep real credentials in `.env`, which is excluded from Git.
-
-### 3. Start PostgreSQL and Redis
-
-```bash
-docker compose up -d
-docker compose ps
-```
-
-| Service | Host address | Container port |
+| Endpoint | Fungsi | Response |
 | --- | --- | --- |
-| PostgreSQL | `localhost:55432` | `5432` |
-| Redis | `localhost:6380` | `6379` |
+| `POST /jobs` | Validasi input, simpan job `QUEUED`, enqueue ke BullMQ | `202` `{ id, status }` · `400` input salah · `503` Redis mati |
+| `GET /jobs` | Semua job + status + hasil yang tersimpan (opsional `?status=COMPLETED`) | `200` `{ total, data: [...] }` |
+| `GET /jobs/:id` | Status & hasil satu job | `200` job · `404` jika tidak ada |
 
-The API and worker run on your host machine. Docker Compose starts only the database and Redis.
-
-### 4. Generate the contract and initialize the database
-
-```bash
-pnpm contract:emit
-pnpm exec prisma db init
-pnpm exec prisma db verify
-```
-
-The schema lives in [`prisma/schema.prisma`](prisma/schema.prisma). Contract generation writes the runtime metadata and TypeScript types to `src/generated/prisma/`, as configured in `prisma.config.ts`. Database initialization creates the missing schema structures and signs the database with the contract.
-
-After editing the schema during a lesson:
-
-```bash
-pnpm contract:emit
-pnpm exec prisma db update --dry-run
-pnpm exec prisma db update
-```
-
-Review the preview before applying schema changes to a database containing data you want to keep.
-
-### 5. Run the API and worker
-
-In one terminal:
-
-```bash
-pnpm dev
-```
-
-In another terminal:
-
-```bash
-pnpm worker:dev
-```
-
-The API listens at `http://localhost:3000`. Try `/jobs`; there is no route at `/`. Keep both processes running to complete jobs.
-
-## Try the API
-
-### Submit a job
-
-```bash
-curl -i -X POST http://localhost:3000/jobs \
-  -H 'Content-Type: application/json' \
-  -d '{"destination":"Bali, Indonesia","budget":"IDR 2,000,000"}'
-```
-
-A successful request returns **202 Accepted** with a `job` object containing `id`, `destination`, `budget`, `status: "PENDING"`, and `createdAt`. Copy the job ID for the next request.
-
-Both input fields must be strings of at most 255 characters. Include a currency in the budget for a clearer AI prompt. Invalid bodies return a validation error. Empty strings currently pass HTTP validation but are rejected by the worker.
-
-### List jobs and check status
-
-```bash
-curl http://localhost:3000/jobs
-```
-
-Response shape: `{ "jobs": [...] }`. A successfully processed job changes from `PENDING` to `COMPLETED`.
-
-### Retrieve generated suggestions
-
-```bash
-curl http://localhost:3000/jobs/YOUR_JOB_ID
-```
-
-Response shape:
+Body `POST /jobs`:
 
 ```json
 {
-  "jobId": "YOUR_JOB_ID",
-  "destinationList": [
-    {
-      "id": "RESULT_ID",
-      "name": "Example destination",
-      "description": "An AI-generated description",
-      "location": "Bali, Indonesia",
-      "jobId": "YOUR_JOB_ID"
-    }
-  ]
+  "topic": "Big-O notation",          // wajib, 3-200 karakter
+  "level": "beginner",                // beginner | intermediate | advanced (default beginner)
+  "material": "teks artikel/catatan"  // opsional, 50-20.000 karakter
 }
 ```
 
-The prompt asks for two suggestions, although the output schema does not enforce an exact count. The endpoint returns an empty `destinationList` when no results exist yet, including for an unknown job ID. It does not return job status; use `GET /jobs` to inspect status.
+Bentuk satu job (dipakai di `GET /jobs` dan `GET /jobs/:id`):
 
-## Code walkthrough
+```json
+{
+  "id": "uuid",
+  "status": "COMPLETED",
+  "step": "save",
+  "input": { "topic": "Big-O notation", "level": "beginner", "hasMaterial": false },
+  "attempts": 1,
+  "error": null,
+  "createdAt": "2026-10-05T00:11:13.985962Z",
+  "finishedAt": "2026-10-05T00:11:46.218Z",
+  "result": {
+    "title": "...",
+    "overview": "...",
+    "objectives": ["..."],
+    "concepts": [{ "name": "...", "explanation": "...", "example": "...", "commonMistake": "..." }],
+    "quiz": [{ "question": "...", "options": ["A", "B", "C", "D"], "answerIndex": 2, "explanation": "..." }]
+  }
+}
+```
 
-| File | Read it to understand |
+`result` bernilai **`null`** selama job belum `COMPLETED` (termasuk saat `FAILED`).
+
+## Alur pipeline
+
+```text
+POST /jobs ──► StudyJob (QUEUED) ──► Redis / BullMQ ──► worker
+                                                        │
+          status: PROCESSING                            ▼
+          step:   outline  → cek topik bisa dipelajari, buat tujuan + daftar konsep
+                  explain  → jelaskan tiap konsep + contoh + kesalahan umum
+                  quiz     → buat soal pilihan ganda, buang soal yang jawabannya tidak valid
+                  save     → simpan StudyGuide + set COMPLETED dalam satu transaksi
+```
+
+Status job: `QUEUED → PROCESSING → COMPLETED`, atau `RETRYING` (gagal sementara, akan dicoba lagi) → `FAILED`.
+
+**Penanganan kegagalan**
+
+- Setiap job punya `attempts: 3` dengan backoff eksponensial (5s, 10s).
+- Error sementara (provider timeout, rate limit, output model tidak valid) → status `RETRYING`, lalu dicoba lagi.
+- Topik yang tidak bisa dipelajari (mis. teks acak) ditolak oleh langkah `outline` dengan `UnrecoverableError` → langsung `FAILED` tanpa retry.
+- Di percobaan terakhir → `FAILED`, `error` berisi pesannya, `step` menunjukkan langkah yang gagal.
+- Kalau enqueue ke Redis gagal, job langsung ditandai `FAILED` dan API membalas `503` (tidak ada job "nyangkut" di `QUEUED`).
+
+## Cara menjalankan
+
+Butuh Node.js 22+, pnpm, Docker, dan API key provider OpenAI-compatible untuk anvia.
+
+```bash
+pnpm install
+cp .env.example .env          # isi OPENAI_API_KEY (dan OPENAI_BASE_URL / OPENAI_MODEL bila perlu)
+
+docker compose up -d --wait   # PostgreSQL :55432 + Redis :6380
+
+pnpm contract:emit            # generate contract Prisma ke src/generated/prisma
+pnpm db:init                  # buat tabel + tandatangani database
+pnpm db:verify
+
+pnpm dev                      # terminal 1: API  -> http://localhost:3000
+pnpm worker:dev               # terminal 2: worker
+```
+
+Setelah mengubah `prisma/schema.prisma`: `pnpm contract:emit` lalu `pnpm db:update`.
+
+> Prisma 8 membaca kolom `DateTime` sebagai `Temporal`. Node < 26.8 belum punya `Temporal` bawaan, jadi `src/utils/db.ts` memasang `temporal-polyfill` sebelum client dibuat.
+
+## Demo alur lengkap
+
+Bisa juga pakai [`requests.http`](requests.http) (ekstensi VS Code REST Client).
+
+```bash
+# 1. Mulai job
+curl -i -X POST http://localhost:3000/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"topic":"Big-O notation and time complexity","level":"beginner"}'
+
+# 2. Lihat semua job (status berubah QUEUED -> PROCESSING -> COMPLETED)
+curl http://localhost:3000/jobs
+
+# 3. Ambil hasil satu job
+curl http://localhost:3000/jobs/<ID>
+
+# 4. Job gagal: topik acak ditolak oleh langkah outline -> FAILED
+curl -X POST http://localhost:3000/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"topic":"qwxz jjkl ppfv zzrt","level":"beginner"}'
+
+# 5. Hasil tetap ada setelah restart: matikan `pnpm dev` (Ctrl+C), jalankan lagi, lalu
+curl http://localhost:3000/jobs/<ID>
+```
+
+## Struktur kode
+
+| File | Isi |
 | --- | --- |
-| [`src/index.ts`](src/index.ts) | Server startup and route registration |
-| [`src/modules/job/router.ts`](src/modules/job/router.ts) | Validation, database queries, and queue submission |
-| [`src/modules/job/schema.ts`](src/modules/job/schema.ts) | Accepted request body |
-| [`src/worker/queue.ts`](src/worker/queue.ts) | Queue producer |
-| [`src/worker/config.ts`](src/worker/config.ts) | Shared queue name and Redis connection |
-| [`src/worker/worker.ts`](src/worker/worker.ts) | Job processing, result persistence, and status update |
-| [`src/modules/job/service.ts`](src/modules/job/service.ts) | AI prompt and structured output schema |
-| [`src/llm/models.ts`](src/llm/models.ts) | Provider credentials, base URL, and model selection |
-| [`src/utils/db.ts`](src/utils/db.ts) | Database client used by the application |
-| [`prisma/schema.prisma`](prisma/schema.prisma) | `Job` and `JobResult` models |
-
-`Job` stores the request and its status. `JobResult` stores each suggestion with a `jobId` string. The schema does not currently declare a relation or foreign key between these models.
-
-## Commands
-
-| Command | Purpose |
-| --- | --- |
-| `pnpm dev` | Run the API with file watching |
-| `pnpm worker:dev` | Run the worker with file watching |
-| `pnpm contract:emit` | Regenerate the Prisma data contract |
-| `pnpm exec prisma db verify` | Check the database against the contract |
-| `pnpm exec tsc --noEmit` | Check TypeScript without emitting files |
-| `pnpm build` | Attempt TypeScript compilation; see limitation below |
-| `pnpm start` | Run `dist/index.js` after a working build |
-| `docker compose stop` | Stop local services while retaining their volumes |
-
-**Current build limitation:** the TypeScript configuration includes `prisma.config.ts` and `prisma/db.ts` outside its `src` root directory, so type checking and compilation currently report `TS6059`. Compiled Node execution also needs compatible module resolution for the source's extensionless imports. Use the `tsx` development commands for lessons; the build/start workflow needs follow-up work. There is no automated test script or compiled worker start script yet.
-
-## Troubleshooting
-
-- **Database connection fails:** check `docker compose ps` and ensure `DATABASE_URL` uses host port `55432` and the Compose credentials.
-- **Tables are missing or the contract does not match:** regenerate the contract, initialize a fresh database or update an existing one, then run `pnpm exec prisma db verify`.
-- **Redis connection fails:** ensure Redis is running on host port `6380`, matching `src/worker/config.ts`.
-- **Jobs remain `PENDING`:** check that the worker is running and inspect its terminal output. AI or persistence failures do not currently update the database status to `FAILED`.
-- **The provider rejects the request:** check the API key, optional base URL, and model ID in `src/llm/models.ts`.
-
-## Classroom exercises
-
-1. Start only the API, submit a job, and observe its `PENDING` status. Start the worker and explain why the original HTTP request does not need to remain open.
-2. Require non-empty destination and budget values, then test missing, empty, and overlong inputs.
-3. Add `PROCESSING` and `FAILED` states, plus a status endpoint that distinguishes a missing job from one still running.
-4. Configure retries and backoff. Make result writes idempotent so a retry cannot create duplicate suggestions.
-5. Add a database relation between jobs and results, and save results plus the completion status in a transaction.
-6. Consider what happens if the database insert succeeds but enqueueing fails. Explore an outbox approach for reliable submission.
-7. Add pagination, authentication, and tests before expanding the demo into a deployed application.
-
-This teaching app focuses on the core workflow. It currently has no authentication, explicit retry policy, or transaction spanning result creation and status updates.
+| [`src/index.ts`](src/index.ts) | Server Hono, logger, error handler, graceful shutdown |
+| [`src/config/env.ts`](src/config/env.ts) | Validasi environment variable dengan Zod |
+| [`src/modules/job/router.ts`](src/modules/job/router.ts) | Ketiga endpoint `/jobs` |
+| [`src/modules/job/schema.ts`](src/modules/job/schema.ts) | Validasi body & query |
+| [`src/modules/job/presenter.ts`](src/modules/job/presenter.ts) | Bentuk response job (`result: null` bila belum siap) |
+| [`src/modules/job/service.ts`](src/modules/job/service.ts) | Pipeline AI 3 langkah (outline → explain → quiz) |
+| [`src/modules/job/status.ts`](src/modules/job/status.ts) | Konstanta status dan langkah pipeline |
+| [`src/worker/worker.ts`](src/worker/worker.ts) | Worker BullMQ: update status per langkah, retry, FAILED, transaksi simpan |
+| [`src/worker/queue.ts`](src/worker/queue.ts) / [`config.ts`](src/worker/config.ts) | Queue, koneksi Redis, opsi retry |
+| [`src/llm/models.ts`](src/llm/models.ts) | Client anvia OpenAI-compatible |
+| [`src/utils/db.ts`](src/utils/db.ts) | Client Prisma Next + polyfill Temporal |
+| [`prisma/schema.prisma`](prisma/schema.prisma) | Model `StudyJob` 1-1 `StudyGuide` |

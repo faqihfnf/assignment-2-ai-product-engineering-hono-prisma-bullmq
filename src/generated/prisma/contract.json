@@ -4,12 +4,12 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
-    "job": {
-      "model": "Job",
+    "studyGuide": {
+      "model": "StudyGuide",
       "namespace": "public"
     },
-    "jobResult": {
-      "model": "JobResult",
+    "studyJob": {
+      "model": "StudyJob",
       "namespace": "public"
     }
   },
@@ -17,12 +17,12 @@
     "namespaces": {
       "public": {
         "models": {
-          "Job": {
+          "StudyGuide": {
             "fields": {
-              "budget": {
+              "concepts": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/text@1",
+                  "codecId": "pg/json@1",
                   "kind": "scalar"
                 }
               },
@@ -30,60 +30,6 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
-                  "kind": "scalar"
-                }
-              },
-              "destination": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "id": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "status": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              }
-            },
-            "relations": {},
-            "storage": {
-              "fields": {
-                "budget": {
-                  "column": "budget"
-                },
-                "createdAt": {
-                  "column": "createdAt"
-                },
-                "destination": {
-                  "column": "destination"
-                },
-                "id": {
-                  "column": "id"
-                },
-                "status": {
-                  "column": "status"
-                }
-              },
-              "namespaceId": "public",
-              "table": "job"
-            }
-          },
-          "JobResult": {
-            "fields": {
-              "description": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -101,14 +47,28 @@
                   "kind": "scalar"
                 }
               },
-              "location": {
+              "objectives": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/json@1",
+                  "kind": "scalar"
+                }
+              },
+              "overview": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
-              "name": {
+              "quiz": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/json@1",
+                  "kind": "scalar"
+                }
+              },
+              "title": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -116,11 +76,30 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "job": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "jobId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "StudyJob",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
-                "description": {
-                  "column": "description"
+                "concepts": {
+                  "column": "concepts"
+                },
+                "createdAt": {
+                  "column": "createdAt"
                 },
                 "id": {
                   "column": "id"
@@ -128,15 +107,148 @@
                 "jobId": {
                   "column": "jobId"
                 },
-                "location": {
-                  "column": "location"
+                "objectives": {
+                  "column": "objectives"
                 },
-                "name": {
-                  "column": "name"
+                "overview": {
+                  "column": "overview"
+                },
+                "quiz": {
+                  "column": "quiz"
+                },
+                "title": {
+                  "column": "title"
                 }
               },
               "namespaceId": "public",
-              "table": "jobResult"
+              "table": "studyGuide"
+            }
+          },
+          "StudyJob": {
+            "fields": {
+              "attempts": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "error": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "finishedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "level": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "material": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "step": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "topic": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "guide": {
+                "cardinality": "1:1",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "jobId"
+                  ]
+                },
+                "to": {
+                  "model": "StudyGuide",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "attempts": {
+                  "column": "attempts"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "error": {
+                  "column": "error"
+                },
+                "finishedAt": {
+                  "column": "finishedAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "level": {
+                  "column": "level"
+                },
+                "material": {
+                  "column": "material"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "step": {
+                  "column": "step"
+                },
+                "topic": {
+                  "column": "topic"
+                }
+              },
+              "namespaceId": "public",
+              "table": "studyJob"
             }
           }
         }
@@ -148,11 +260,11 @@
       "public": {
         "entries": {
           "table": {
-            "job": {
+            "studyGuide": {
               "columns": {
-                "budget": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
+                "concepts": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
                   "nullable": false
                 },
                 "createdAt": {
@@ -162,38 +274,6 @@
                     "kind": "function"
                   },
                   "nativeType": "timestamptz",
-                  "nullable": false
-                },
-                "destination": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "id": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "status": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                }
-              },
-              "foreignKeys": [],
-              "indexes": [],
-              "primaryKey": {
-                "columns": [
-                  "id"
-                ]
-              },
-              "uniques": []
-            },
-            "jobResult": {
-              "columns": {
-                "description": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
                   "nullable": false
                 },
                 "id": {
@@ -206,12 +286,116 @@
                   "nativeType": "text",
                   "nullable": false
                 },
-                "location": {
+                "objectives": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
+                  "nullable": false
+                },
+                "overview": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
                 },
-                "name": {
+                "quiz": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
+                  "nullable": false
+                },
+                "title": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "jobId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "studyGuide"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "studyJob"
+                  }
+                }
+              ],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "jobId"
+                  ]
+                }
+              ]
+            },
+            "studyJob": {
+              "columns": {
+                "attempts": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "error": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "finishedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "level": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "material": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "step": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "topic": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
@@ -232,10 +416,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "9e3593719b92e7d519888c9a4bb5c7ee8ecf5ff82b282b74cc71ad6ab6a0596a"
+    "storageHash": "ef513d7b34a17bf1aa6792e9f98940e3f375a68552904faed002df567a8ecd84"
   },
   "execution": {
-    "executionHash": "2d377016ed7b4667e9b7df178af156b6af4e1032592d89d4c1030b0cce080e59",
+    "executionHash": "9167e99913e0d21227483c76f6a3ed566b303230b063bc985b1bdcddc8dcb372",
     "mutations": {
       "defaults": [
         {
@@ -246,7 +430,7 @@
           "ref": {
             "column": "id",
             "namespace": "public",
-            "table": "job"
+            "table": "studyGuide"
           }
         },
         {
@@ -257,7 +441,7 @@
           "ref": {
             "column": "id",
             "namespace": "public",
-            "table": "jobResult"
+            "table": "studyJob"
           }
         }
       ]

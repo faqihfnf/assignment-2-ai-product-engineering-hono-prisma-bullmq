@@ -1,0 +1,53 @@
+### Demo flow - open with the VS Code "REST Client" extension, or copy the curl commands from README.md
+
+@base = http://localhost:3000
+
+### 1. Start a job (202 + id + status)
+# @name create
+POST {{base}}/jobs
+Content-Type: application/json
+
+{
+  "topic": "Big-O notation and time complexity",
+  "level": "beginner"
+}
+
+### 2. Start a job grounded in your own material
+POST {{base}}/jobs
+Content-Type: application/json
+
+{
+  "topic": "Photosynthesis",
+  "level": "intermediate",
+  "material": "Photosynthesis is the process plants, algae and some bacteria use to turn light energy into chemical energy. It happens in the chloroplasts. The light-dependent reactions in the thylakoid membranes split water, release oxygen and produce ATP and NADPH. The Calvin cycle in the stroma uses that ATP and NADPH to fix carbon dioxide into glucose."
+}
+
+### 3. List all jobs (with status + saved result)
+GET {{base}}/jobs
+
+### 4. List only completed / failed jobs
+GET {{base}}/jobs?status=COMPLETED
+
+### 5. Fetch one job by id (result is null until COMPLETED)
+GET {{base}}/jobs/{{create.response.body.id}}
+
+### 6. Unknown id -> 404
+GET {{base}}/jobs/00000000-0000-0000-0000-000000000000
+
+### 7. Invalid input -> 400
+POST {{base}}/jobs
+Content-Type: application/json
+
+{
+  "topic": "x",
+  "level": "expert"
+}
+
+### 8. Failed job: the outline step rejects gibberish -> FAILED without retrying
+POST {{base}}/jobs
+Content-Type: application/json
+
+{
+  "topic": "qwxz jjkl ppfv zzrt",
+  "level": "beginner"
+}

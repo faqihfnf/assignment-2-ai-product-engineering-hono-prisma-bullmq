@@ -33,9 +33,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'aad27b187c985bbbbac56a0836447f224af788ed7f76fa7f722b5161550b0af3'>;
+  StorageHashBase<'ef513d7b34a17bf1aa6792e9f98940e3f375a68552904faed002df567a8ecd84'>;
 export type ExecutionHash =
-  ExecutionHashBase<'9a39f0c5a7df40b28f4af20ecc6003aa07c082343f1ca5c4b721f581bcbe746e'>;
+  ExecutionHashBase<'9167e99913e0d21227483c76f6a3ed566b303230b063bc985b1bdcddc8dcb372'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -241,45 +241,105 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
-    readonly Job: {
+    readonly StudyGuide: {
       readonly id: CodecTypes['pg/text@1']['output'];
-      readonly destination: CodecTypes['pg/text@1']['output'];
-      readonly budget: CodecTypes['pg/text@1']['output'];
-      readonly status: CodecTypes['pg/text@1']['output'];
+      readonly jobId: CodecTypes['pg/text@1']['output'];
+      readonly title: CodecTypes['pg/text@1']['output'];
+      readonly overview: CodecTypes['pg/text@1']['output'];
+      readonly objectives: CodecTypes['pg/json@1']['output'];
+      readonly concepts: CodecTypes['pg/json@1']['output'];
+      readonly quiz: CodecTypes['pg/json@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    };
+    readonly StudyJob: {
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly topic: CodecTypes['pg/text@1']['output'];
+      readonly level: CodecTypes['pg/text@1']['output'];
+      readonly material: CodecTypes['pg/text@1']['output'] | null;
+      readonly status: CodecTypes['pg/text@1']['output'];
+      readonly step: CodecTypes['pg/text@1']['output'] | null;
+      readonly attempts: CodecTypes['pg/int4@1']['output'];
+      readonly error: CodecTypes['pg/text@1']['output'] | null;
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly finishedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
     };
   };
 };
 export type FieldInputTypes = {
   readonly public: {
-    readonly Job: {
+    readonly StudyGuide: {
       readonly id: CodecTypes['pg/text@1']['input'];
-      readonly destination: CodecTypes['pg/text@1']['input'];
-      readonly budget: CodecTypes['pg/text@1']['input'];
-      readonly status: CodecTypes['pg/text@1']['input'];
+      readonly jobId: CodecTypes['pg/text@1']['input'];
+      readonly title: CodecTypes['pg/text@1']['input'];
+      readonly overview: CodecTypes['pg/text@1']['input'];
+      readonly objectives: CodecTypes['pg/json@1']['input'];
+      readonly concepts: CodecTypes['pg/json@1']['input'];
+      readonly quiz: CodecTypes['pg/json@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+    };
+    readonly StudyJob: {
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly topic: CodecTypes['pg/text@1']['input'];
+      readonly level: CodecTypes['pg/text@1']['input'];
+      readonly material: CodecTypes['pg/text@1']['input'] | null;
+      readonly status: CodecTypes['pg/text@1']['input'];
+      readonly step: CodecTypes['pg/text@1']['input'] | null;
+      readonly attempts: CodecTypes['pg/int4@1']['input'];
+      readonly error: CodecTypes['pg/text@1']['input'] | null;
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly finishedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
     };
   };
 };
 export type StorageColumnTypes = {
   readonly public: {
-    readonly job: {
-      readonly budget: CodecTypes['pg/text@1']['output'];
+    readonly studyGuide: {
+      readonly concepts: CodecTypes['pg/json@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-      readonly destination: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
+      readonly jobId: CodecTypes['pg/text@1']['output'];
+      readonly objectives: CodecTypes['pg/json@1']['output'];
+      readonly overview: CodecTypes['pg/text@1']['output'];
+      readonly quiz: CodecTypes['pg/json@1']['output'];
+      readonly title: CodecTypes['pg/text@1']['output'];
+    };
+    readonly studyJob: {
+      readonly attempts: CodecTypes['pg/int4@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly error: CodecTypes['pg/text@1']['output'] | null;
+      readonly finishedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly level: CodecTypes['pg/text@1']['output'];
+      readonly material: CodecTypes['pg/text@1']['output'] | null;
       readonly status: CodecTypes['pg/text@1']['output'];
+      readonly step: CodecTypes['pg/text@1']['output'] | null;
+      readonly topic: CodecTypes['pg/text@1']['output'];
     };
   };
 };
 export type StorageColumnInputTypes = {
   readonly public: {
-    readonly job: {
-      readonly budget: CodecTypes['pg/text@1']['input'];
+    readonly studyGuide: {
+      readonly concepts: CodecTypes['pg/json@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
-      readonly destination: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
+      readonly jobId: CodecTypes['pg/text@1']['input'];
+      readonly objectives: CodecTypes['pg/json@1']['input'];
+      readonly overview: CodecTypes['pg/text@1']['input'];
+      readonly quiz: CodecTypes['pg/json@1']['input'];
+      readonly title: CodecTypes['pg/text@1']['input'];
+    };
+    readonly studyJob: {
+      readonly attempts: CodecTypes['pg/int4@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly error: CodecTypes['pg/text@1']['input'] | null;
+      readonly finishedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly level: CodecTypes['pg/text@1']['input'];
+      readonly material: CodecTypes['pg/text@1']['input'] | null;
       readonly status: CodecTypes['pg/text@1']['input'];
+      readonly step: CodecTypes['pg/text@1']['input'] | null;
+      readonly topic: CodecTypes['pg/text@1']['input'];
     };
   };
 };
@@ -301,26 +361,41 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
-            readonly job: {
+            readonly studyGuide: {
               columns: {
                 readonly id: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly destination: {
+                readonly jobId: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly budget: {
+                readonly title: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly status: {
+                readonly overview: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly objectives: {
+                  readonly nativeType: 'json';
+                  readonly codecId: 'pg/json@1';
+                  readonly nullable: false;
+                };
+                readonly concepts: {
+                  readonly nativeType: 'json';
+                  readonly codecId: 'pg/json@1';
+                  readonly nullable: false;
+                };
+                readonly quiz: {
+                  readonly nativeType: 'json';
+                  readonly codecId: 'pg/json@1';
                   readonly nullable: false;
                 };
                 readonly createdAt: {
@@ -328,6 +403,82 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-temporal@1';
                   readonly nullable: false;
                   readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['jobId'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'studyGuide';
+                    readonly columns: readonly ['jobId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'studyJob';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly studyJob: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly topic: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly level: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly material: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly status: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly step: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly attempts: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                };
+                readonly error: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly createdAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                };
+                readonly finishedAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: true;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
@@ -346,29 +497,45 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
-    readonly job: { readonly namespace: 'public' & NamespaceId; readonly model: 'Job' };
+    readonly studyJob: { readonly namespace: 'public' & NamespaceId; readonly model: 'StudyJob' };
+    readonly studyGuide: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'StudyGuide';
+    };
   };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
         readonly models: {
-          readonly Job: {
+          readonly StudyGuide: {
             readonly fields: {
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly destination: {
+              readonly jobId: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly budget: {
+              readonly title: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly status: {
+              readonly overview: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly objectives: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/json@1' };
+              };
+              readonly concepts: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/json@1' };
+              };
+              readonly quiz: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/json@1' };
               };
               readonly createdAt: {
                 readonly nullable: false;
@@ -378,16 +545,110 @@ type ContractBase = Omit<
                 };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly job: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'StudyJob';
+                };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['jobId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
             readonly storage: {
-              readonly table: 'job';
+              readonly table: 'studyGuide';
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly id: { readonly column: 'id' };
-                readonly destination: { readonly column: 'destination' };
-                readonly budget: { readonly column: 'budget' };
-                readonly status: { readonly column: 'status' };
+                readonly jobId: { readonly column: 'jobId' };
+                readonly title: { readonly column: 'title' };
+                readonly overview: { readonly column: 'overview' };
+                readonly objectives: { readonly column: 'objectives' };
+                readonly concepts: { readonly column: 'concepts' };
+                readonly quiz: { readonly column: 'quiz' };
                 readonly createdAt: { readonly column: 'createdAt' };
+              };
+            };
+          };
+          readonly StudyJob: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly topic: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly level: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly material: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly step: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly attempts: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly error: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly finishedAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly guide: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'StudyGuide';
+                };
+                readonly cardinality: '1:1';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['jobId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'studyJob';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly topic: { readonly column: 'topic' };
+                readonly level: { readonly column: 'level' };
+                readonly material: { readonly column: 'material' };
+                readonly status: { readonly column: 'status' };
+                readonly step: { readonly column: 'step' };
+                readonly attempts: { readonly column: 'attempts' };
+                readonly error: { readonly column: 'error' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly finishedAt: { readonly column: 'finishedAt' };
               };
             };
           };
@@ -421,7 +682,15 @@ type ContractBase = Omit<
         {
           readonly ref: {
             readonly namespace: 'public';
-            readonly table: 'job';
+            readonly table: 'studyGuide';
+            readonly column: 'id';
+          };
+          readonly onCreate: { readonly kind: 'generator'; readonly id: 'uuidv4' };
+        },
+        {
+          readonly ref: {
+            readonly namespace: 'public';
+            readonly table: 'studyJob';
             readonly column: 'id';
           };
           readonly onCreate: { readonly kind: 'generator'; readonly id: 'uuidv4' };

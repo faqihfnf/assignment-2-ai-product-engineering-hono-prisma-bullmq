@@ -1,17 +1,30 @@
 // use prisma-next
 
-model Job {
-  id          String   @id @default(uuid())
-  destination String
-  budget      String
-  status      String
-  createdAt   DateTime @default(now())
+// One row per request submitted to POST /jobs.
+// status: QUEUED -> PROCESSING -> COMPLETED | FAILED
+model StudyJob {
+  id         String      @id @default(uuid())
+  topic      String
+  level      String
+  material   String?
+  status     String
+  step       String?
+  attempts   Int         @default(0)
+  error      String?
+  createdAt  DateTime    @default(now())
+  finishedAt DateTime?
+  guide      StudyGuide?
 }
 
-model JobResult {
-  id        String   @id @default(uuid())
-  name      String
-  description String
-  location  String
-  jobId     String
+// The final AI output. Only exists once the pipeline has finished successfully.
+model StudyGuide {
+  id         String   @id @default(uuid())
+  jobId      String   @unique
+  job        StudyJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  title      String
+  overview   String
+  objectives Json
+  concepts   Json
+  quiz       Json
+  createdAt  DateTime @default(now())
 }

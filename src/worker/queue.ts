@@ -1,4 +1,12 @@
 import { Queue } from "bullmq";
-import { QUEUE_NAME, workerConnection } from "./config";
+import { defaultJobOptions, JOB_NAME, QUEUE_NAME, redisConnection, type StudyGuideJobData } from "./config";
 
-export const queue = new Queue(QUEUE_NAME, { connection: workerConnection });
+export const studyGuideQueue = new Queue<StudyGuideJobData>(QUEUE_NAME, {
+  connection: redisConnection,
+  defaultJobOptions,
+});
+
+export function enqueueStudyGuide(jobId: string) {
+  // Reuse the database id as the BullMQ id so the same job can never be queued twice.
+  return studyGuideQueue.add(JOB_NAME, { jobId }, { jobId });
+}
